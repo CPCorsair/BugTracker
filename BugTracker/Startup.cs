@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BugTracker.Data;
 using Microsoft.EntityFrameworkCore;
+using BugTracker.Configuration;
+using Microsoft.AspNetCore.Identity;
 
 namespace BugTracker
 {
@@ -61,6 +63,16 @@ namespace BugTracker
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            //Seeding in the roles in roles database
+            IServiceScopeFactory scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+
+            IServiceScope scope = scopeFactory.CreateScope();
+            RoleManager<IdentityRole> roleManager = 
+                scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            new UserRoleSeed(roleManager).Seed();
         }
+            
     }
 }
