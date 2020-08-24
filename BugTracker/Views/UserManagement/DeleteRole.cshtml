@@ -1,0 +1,9 @@
+﻿@model BugTracker.ViewModels.UserManagementDeleteRoleViewModel
+
+<h3>Delete Role for @Model.Email</h3>
+<div asp-validation-summary="All"></div>
+<form asp-controller="UserManagement" asp-action="DeleteRole">
+    <input asp-for="UserId" type="hidden" />
+    <select asp-for="OldRole" asp-items="Model.CurrentRoles"></select>
+    <input type="submit" value="Delete Role" />
+</form>

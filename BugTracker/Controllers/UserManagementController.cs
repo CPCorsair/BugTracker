@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using BugTracker.Areas.Identity.Data;
 using BugTracker.Data;
 using BugTracker.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BugTracker.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserManagementController : Controller
     {
         private readonly AuthDbContext _dbContext;
@@ -41,6 +43,11 @@ namespace BugTracker.Controllers
         [HttpGet]
         public async Task<IActionResult> AddRole(string id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             var user = await GetUserById(id);
             var vm = new UserManagementAddRoleViewModel
             {
@@ -52,6 +59,7 @@ namespace BugTracker.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddRole(UserManagementAddRoleViewModel rvm) //rvm = result view model
         {
             var user = await GetUserById(rvm.UserId);
@@ -70,6 +78,48 @@ namespace BugTracker.Controllers
             }
             rvm.Email = user.Email;
             rvm.Roles = GetAllRoles();
+            return View(rvm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteRole(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await GetUserById(id);
+            var vm = new UserManagementDeleteRoleViewModel
+            {
+                UserId = id,
+                Email = user.Email,
+                CurrentRoles = new SelectList(await _userManager.GetRolesAsync(user))
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteRole(UserManagementDeleteRoleViewModel rvm)
+        {
+
+            var user = await GetUserById(rvm.UserId);
+
+            if (ModelState.IsValid)
+            {
+                var result = await _userManager.RemoveFromRoleAsync(user, rvm.OldRole);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+            }
+            rvm.Email = user.Email;
+            rvm.CurrentRoles = new SelectList(await _userManager.GetRolesAsync(user));
             return View(rvm);
         }
 
