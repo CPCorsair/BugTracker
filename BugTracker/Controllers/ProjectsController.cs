@@ -7,16 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BugTracker.Data;
 using BugTracker.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using BugTracker.Areas.Identity.Data;
+using BugTracker.Authorization;
 
 namespace BugTracker.Controllers
 {
     public class ProjectsController : Controller
     {
         private readonly BugTrackerContext _context;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProjectsController(BugTrackerContext context)
+        public ProjectsController(BugTrackerContext context, 
+                                  IAuthorizationService authorizationService,
+                                  UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _authorizationService = authorizationService;
+            _userManager = userManager;
         }
 
         // GET: Projects
@@ -37,6 +47,7 @@ namespace BugTracker.Controllers
                 .Include (m => m.Tickets) //Project model already has Tickets associated (icollection)
                 .AsNoTracking() //optional; more efficient way to do things apparently
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (project == null)
             {
                 return NotFound();
@@ -60,6 +71,15 @@ namespace BugTracker.Controllers
         {
             if (ModelState.IsValid)
             {
+                project.OwnerId = _userManager.GetUserId(User);
+
+                var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Create);
+
+                if (!isAuthorized.Succeeded)
+                {
+                    return Forbid();
+                }
+
                 _context.Add(project);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -80,23 +100,48 @@ namespace BugTracker.Controllers
             {
                 return NotFound();
             }
+
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Update);
+
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
             return View(project);
         }
 
         // POST: Projects/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //NOTE: int id is mostly likely passed in through the URL
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,DateCreated")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,OwnerId,Title,Description,DateCreated")] Project project)
         {
             if (id != project.Id)
             {
                 return NotFound();
             }
 
+            var uneditedProject = await _context.Projects
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (uneditedProject.OwnerId != project.OwnerId)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
+                var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Update);
+
+                if (!isAuthorized.Succeeded)
+                {
+                    return Forbid();
+                }
+
                 try
                 {
                     _context.Update(project);
@@ -133,15 +178,30 @@ namespace BugTracker.Controllers
                 return NotFound();
             }
 
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Delete);
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
             return View(project);
         }
 
+        //do this
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var project = await _context.Projects.FindAsync(id);
+
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Delete);
+
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

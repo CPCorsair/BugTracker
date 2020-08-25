@@ -1,5 +1,6 @@
 ﻿using System;
 using BugTracker.Areas.Identity.Data;
+using BugTracker.Authorization;
 using BugTracker.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,8 @@ namespace BugTracker.Areas.Identity
                         .RequireAuthenticatedUser()
                         .Build();
                 });
+
+                services.AddScoped<IAuthorizationHandler, ProjectCreatorIsOwnerAuthorizationHandler>();
             });
         }
     }

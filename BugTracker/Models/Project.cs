@@ -10,6 +10,8 @@ namespace BugTracker.Models
     public class Project
     {
         public int Id { get; set; }
+        public string OwnerId { get; set; }
+
         public string Title { get; set; }
         public string Description { get; set; }
         [Display(Name ="Date Created")]
