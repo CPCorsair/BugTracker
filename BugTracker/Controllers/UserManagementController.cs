@@ -32,7 +32,7 @@ namespace BugTracker.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var vm = new UserManagementIndexViewModel
+            var vm = new UserManagementIndexVM
             {
                 Users = _dbContext.Users.OrderBy(u => u.Email).ToList()
             };
@@ -49,7 +49,7 @@ namespace BugTracker.Controllers
             }
 
             var user = await GetUserById(id);
-            var vm = new UserManagementAddRoleViewModel
+            var vm = new UserManagementAddRoleVM
             {
                 Roles = GetAllRoles(),
                 UserId = id,
@@ -60,9 +60,13 @@ namespace BugTracker.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddRole(UserManagementAddRoleViewModel rvm) //rvm = result view model
+        public async Task<IActionResult> AddRole(UserManagementAddRoleVM rvm) //rvm = result view model
         {
             var user = await GetUserById(rvm.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
@@ -90,7 +94,7 @@ namespace BugTracker.Controllers
             }
 
             var user = await GetUserById(id);
-            var vm = new UserManagementDeleteRoleViewModel
+            var vm = new UserManagementDeleteRoleVM
             {
                 UserId = id,
                 Email = user.Email,
@@ -101,7 +105,8 @@ namespace BugTracker.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteRole(UserManagementDeleteRoleViewModel rvm)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRole(UserManagementDeleteRoleVM rvm)
         {
 
             var user = await GetUserById(rvm.UserId);

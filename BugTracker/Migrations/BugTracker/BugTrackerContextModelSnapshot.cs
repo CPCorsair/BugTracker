@@ -56,7 +56,7 @@ namespace BugTracker.Migrations.BugTracker
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Developer")
+                    b.Property<string>("DeveloperId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Priority")
@@ -68,7 +68,10 @@ namespace BugTracker.Migrations.BugTracker
                     b.Property<int>("Severity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Submitter")
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubmitterId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")

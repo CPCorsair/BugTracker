@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using BugTracker.Areas.Identity.Data;
 using BugTracker.Authorization;
+using BugTracker.ViewModels;
+using System.Security.Policy;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using System.Security.Claims;
 
 namespace BugTracker.Controllers
 {
@@ -19,14 +23,20 @@ namespace BugTracker.Controllers
         private readonly BugTrackerContext _context;
         private readonly IAuthorizationService _authorizationService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AuthDbContext _dbContext;
+        private readonly ClaimsPrincipal _claimsPrincipal;
 
         public ProjectsController(BugTrackerContext context, 
                                   IAuthorizationService authorizationService,
-                                  UserManager<ApplicationUser> userManager)
+                                  UserManager<ApplicationUser> userManager,
+                                  AuthDbContext dbContext,
+                                  ClaimsPrincipal claimsPrincipal)
         {
             _context = context;
             _authorizationService = authorizationService;
             _userManager = userManager;
+            _dbContext = dbContext;
+            _claimsPrincipal = claimsPrincipal;
         }
 
         // GET: Projects
@@ -53,7 +63,19 @@ namespace BugTracker.Controllers
                 return NotFound();
             }
 
-            return View(project);
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Read);
+            if (!isAuthorized.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var vm = new ProjectsDetailsVM
+            {
+                Project = project,
+                UsersWithClaim = await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString()))
+            };
+
+            return View(vm);
         }
 
         // GET: Projects/Create
@@ -73,12 +95,12 @@ namespace BugTracker.Controllers
             {
                 project.OwnerId = _userManager.GetUserId(User);
 
-                var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Create);
+                //var isAuthorized = await _authorizationService.AuthorizeAsync(User, project, ProjectOperations.Create);
 
-                if (!isAuthorized.Succeeded)
-                {
-                    return Forbid();
-                }
+                //if (!isAuthorized.Succeeded)
+                //{
+                //    return Forbid();
+                //}
 
                 _context.Add(project);
                 await _context.SaveChangesAsync();
@@ -202,6 +224,19 @@ namespace BugTracker.Controllers
                 return Forbid();
             }
 
+            var projectUsers = await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString()));
+            
+            //if projectUsers is not empty, delete the user claims associated with project
+            if (!projectUsers.Any())
+            {
+                foreach(ApplicationUser u in projectUsers)
+                {
+                    await _userManager.RemoveClaimAsync(u, new Claim("AssignedProject", project.Id.ToString()));
+                }
+            }
+
+            _context.Tickets.Where(t => t.ProjectId == project.Id).ToList().ForEach(t => _context.Tickets.Remove(t));
+
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -210,6 +245,134 @@ namespace BugTracker.Controllers
         private bool ProjectExists(int id)
         {
             return _context.Projects.Any(e => e.Id == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddUser(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            //getting the project using id
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            //var usersOnProject = await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString()));
+
+            var vm = new ProjectsAddUserVM
+            {
+                ProjectId = project.Id,
+                ProjectTitle = project.Title,
+                Users = new SelectList(_dbContext.Users.OrderBy(u => u.Email), "Id", "Email")
+                
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddUser(ProjectsAddUserVM rvm)
+        {
+            var user = await _userManager.FindByIdAsync(rvm.UserId);
+
+            //setting values in view model in case there is an error and the view has to be returned again
+            var project = await _context.Projects.FirstOrDefaultAsync(m => m.Id == rvm.ProjectId);
+            rvm.Users = new SelectList(_dbContext.Users.OrderBy(u => u.Email), "Id", "Email");
+            rvm.ProjectId = project.Id;
+            rvm.ProjectTitle = project.Title;
+
+
+            if (ModelState.IsValid)
+            {
+                //checking if there are duplicate claims
+                var userclaims = await _userManager.GetClaimsAsync(user);
+                var userHasClaim = userclaims.Any(f => f.Type == "AssignedProject" && f.Value == project.Id.ToString());
+                if (userHasClaim)
+                {
+                    ModelState.AddModelError(string.Empty, "User is already assigned to project");
+                    
+                    return View(rvm);
+                }
+
+                //adding the claim to the user
+                var result = await _userManager.AddClaimAsync(user, new Claim("AssignedProject", project.Id.ToString()));
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Details", new { id = rvm.ProjectId.ToString() });
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+            }
+            
+            return View(rvm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RemoveUser(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var project = await _context.Projects
+               .FirstOrDefaultAsync(m => m.Id == id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            var usersExist = await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString()));
+            if (!usersExist.Any())
+            {
+                ModelState.AddModelError(string.Empty, "There are no users assigned to the project");
+                return RedirectToAction(nameof(NoUsersToRemove));
+            }
+
+            var vm = new ProjectsRemoveUserVM
+            {
+                ProjectId = project.Id,
+                ProjectTitle = project.Title,
+                CurrentUsers = 
+                    new SelectList(await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString())), "Id", "Email")
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveUser(ProjectsRemoveUserVM rvm)
+        {
+            var user = await _userManager.FindByIdAsync(rvm.UserId);
+            var project = await _context.Projects.FirstOrDefaultAsync(m => m.Id == rvm.ProjectId);
+
+            var result = await _userManager.RemoveClaimAsync(user, new Claim("AssignedProject", project.Id.ToString()));
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Details", new { id = rvm.ProjectId.ToString() });
+            }
+
+            //repopulating view model
+            rvm.ProjectId = project.Id;
+            rvm.ProjectTitle = project.Title;
+            rvm.CurrentUsers = 
+                    new SelectList(await _userManager.GetUsersForClaimAsync(new Claim("AssignedProject", project.Id.ToString())), "Id", "Email");
+
+            return View(rvm);
+        }
+
+        public IActionResult NoUsersToRemove()
+        {
+            return View();
         }
     }
 }

@@ -26,7 +26,8 @@ namespace BugTracker.Authorization
         public static readonly string UpdateOperationName = "Update";
         public static readonly string DeleteOperationName = "Delete";
 
-        public static readonly string ProjectAdminsRole = "ProjectAdmins";
-        public static readonly string ProjectManagersRole = "ProjectManagers";
+        public static readonly string ProjectAdminsRole = "Admin";
+        public static readonly string ProjectManagersRole = "Manager";
+        public static readonly string ProjectDevelopersRole = "Developer";
     }
 }

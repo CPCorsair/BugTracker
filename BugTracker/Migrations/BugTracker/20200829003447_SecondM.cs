@@ -13,6 +13,7 @@ namespace BugTracker.Migrations.BugTracker
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    OwnerId = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     DateCreated = table.Column<DateTime>(nullable: false)
@@ -31,9 +32,12 @@ namespace BugTracker.Migrations.BugTracker
                     ProjectId = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Submitter = table.Column<string>(nullable: true),
+                    SubmitterId = table.Column<string>(nullable: true),
                     DateCreated = table.Column<DateTime>(nullable: false),
-                    Developer = table.Column<string>(nullable: true)
+                    DeveloperId = table.Column<string>(nullable: true),
+                    Priority = table.Column<int>(nullable: false),
+                    Severity = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

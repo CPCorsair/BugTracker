@@ -7,16 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BugTracker.Data;
 using BugTracker.Models;
+using Microsoft.AspNetCore.Identity;
+using BugTracker.Areas.Identity.Data;
+using System.Security.Claims;
+using BugTracker.ViewModels;
 
 namespace BugTracker.Controllers
 {
     public class TicketsController : Controller
     {
         private readonly BugTrackerContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AuthDbContext _dbContext;
 
-        public TicketsController(BugTrackerContext context)
+        public TicketsController(BugTrackerContext context, 
+                                 UserManager<ApplicationUser> userManager,
+                                 AuthDbContext dbContext)
         {
             _context = context;
+            _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         // GET: Tickets
@@ -44,10 +54,22 @@ namespace BugTracker.Controllers
         }
 
         // GET: Tickets/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateProjectsDropDownList();
-            return View();
+            //PopulateProjectsDropDownList();
+            //select all projects, order by title
+            var projectsQuery = from d in _context.Projects
+                                orderby d.Title
+                                select d;
+            var allDevelopers = await _userManager.GetUsersInRoleAsync("Developer");
+
+            var vm = new TicketsCreateOrEditVM { 
+                Projects = new SelectList(projectsQuery, "Id", "Title"),
+                Developers = new SelectList(allDevelopers,"Id", "Email")
+        };
+
+
+            return View(vm);
         }
 
         // POST: Tickets/Create
@@ -55,18 +77,45 @@ namespace BugTracker.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProjectId,Title,Description,Submitter,DateCreated,Developer,Priority,Severity")] Ticket ticket)
+        public async Task<IActionResult> Create(TicketsCreateOrEditVM rvm)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(ticket);
+               // rvm.ticket.SubmitterId = _userManager.GetUserId(User);
+
+                Ticket t = new Ticket
+                {
+                    Id = rvm.ticket.Id,
+                    ProjectId = rvm.ticket.ProjectId,
+                    Title = rvm.ticket.Title,
+                    Description = rvm.ticket.Description,
+                    SubmitterId = _userManager.GetUserId(User),
+                    DateCreated = rvm.ticket.DateCreated,
+                    DeveloperId = rvm.ticket.DeveloperId,
+                    Priority = rvm.ticket.Priority,
+                    Severity = rvm.ticket.Severity,
+                    Status = rvm.ticket.Status
+                };
+                
+                _context.Add(t);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateProjectsDropDownList();
+            //PopulateProjectsDropDownList();
+            //select all projects, order by title
+            var projectsQuery = from d in _context.Projects
+                                orderby d.Title
+                                select d;
+            var allDevelopers = await _userManager.GetUsersInRoleAsync("Developer");
 
-            return View(ticket);
+            var vm = new TicketsCreateOrEditVM
+            {
+                Projects = new SelectList(projectsQuery, "Id", "Title"),
+                Developers = new SelectList(allDevelopers, "Id", "Email")
+            };
+
+            return View(vm);
         }
 
         // GET: Tickets/Edit/5
@@ -83,8 +132,21 @@ namespace BugTracker.Controllers
                 return NotFound();
             }
 
-            PopulateProjectsDropDownList();
-            return View(ticket);
+            //PopulateProjectsDropDownList();
+
+            //select all projects, order by title
+            var projectsQuery = from d in _context.Projects
+                                orderby d.Title
+                                select d;
+            var allDevelopers = await _userManager.GetUsersInRoleAsync("Developer");
+
+            var vm = new TicketsCreateOrEditVM
+            {
+                Projects = new SelectList(projectsQuery, "Id", "Title"),
+                Developers = new SelectList(allDevelopers, "Id", "Email"),
+                ticket = ticket
+            };
+            return View(vm);
         }
 
         // POST: Tickets/Edit/5
@@ -92,23 +154,37 @@ namespace BugTracker.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ProjectId,Title,Description,Submitter,DateCreated,Developer,Priority,Severity")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, TicketsCreateOrEditVM rvm)
         {
-            if (id != ticket.Id)
+            if (id != rvm.ticket.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
+                Ticket t = new Ticket
+                {
+                    Id = rvm.ticket.Id,
+                    ProjectId = rvm.ticket.ProjectId,
+                    Title = rvm.ticket.Title,
+                    Description = rvm.ticket.Description,
+                    SubmitterId = _userManager.GetUserId(User),
+                    DateCreated = rvm.ticket.DateCreated,
+                    DeveloperId = rvm.ticket.DeveloperId,
+                    Priority = rvm.ticket.Priority,
+                    Severity = rvm.ticket.Severity,
+                    Status = rvm.ticket.Status
+                };
+
                 try
                 {
-                    _context.Update(ticket);
+                    _context.Update(t);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TicketExists(ticket.Id))
+                    if (!TicketExists(rvm.ticket.Id))
                     {
                         return NotFound();
                     }
@@ -120,8 +196,19 @@ namespace BugTracker.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateProjectsDropDownList();
-            return View(ticket);
+            var projectsQuery = from d in _context.Projects
+                                orderby d.Title
+                                select d;
+            var allDevelopers = await _userManager.GetUsersInRoleAsync("Developer");
+
+            var vm = new TicketsCreateOrEditVM
+            {
+                Projects = new SelectList(projectsQuery, "Id", "Title"),
+                Developers = new SelectList(allDevelopers, "Id", "Email"),
+                ticket = rvm.ticket
+            };
+
+            return View(vm);
         }
 
         // GET: Tickets/Delete/5

@@ -1,4 +1,4 @@
-﻿@model BugTracker.Models.Ticket
+﻿@model BugTracker.ViewModels.TicketsCreateOrEditVM
 
 @{
     ViewData["Title"] = "Create";
@@ -14,52 +14,50 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @*<div class="form-group">
+                <label asp-for="@Model.ticket.SubmitterId" class="control-label"></label>
+                <input asp-for="@Model.ticket.SubmitterId" type="hidden" />
+            </div>*@
             <div class="form-group">
-                <label asp-for="ProjectId" class="control-label"></label>
-                <select asp-for="ProjectId" class="form-control" asp-items="ViewBag.ProjectId"></select>
+                <label asp-for="@Model.ticket.ProjectId" class="control-label"></label>
+                <select asp-for="@Model.ticket.ProjectId" class="form-control" asp-items="@Model.Projects"></select>
             </div>
             <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <label asp-for="@Model.ticket.Title" class="control-label"></label>
+                <input asp-for="@Model.ticket.Title" class="form-control" />
+                <span asp-validation-for="@Model.ticket.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <label asp-for="@Model.ticket.Description" class="control-label"></label>
+                <input asp-for="@Model.ticket.Description" class="form-control" />
+                <span asp-validation-for="@Model.ticket.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Submitter" class="control-label"></label>
-                <input asp-for="Submitter" class="form-control" />
-                <span asp-validation-for="Submitter" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Priority" class="control-label"></label>
-                <select asp-for="Priority"
+                <label asp-for="@Model.ticket.Priority" class="control-label"></label>
+                <select asp-for="@Model.ticket.Priority"
                         class="form-control"
                         asp-items="Html.GetEnumSelectList<TicketPriority>()">
                     @*<option>Select Priority</option>*@
                 </select>
-                <span asp-validation-for="Priority" class="text-danger"></span>
+                <span asp-validation-for="@Model.ticket.Priority" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Severity" class="control-label"></label>
-                <select asp-for="Severity"
+                <label asp-for="@Model.ticket.Severity" class="control-label"></label>
+                <select asp-for="@Model.ticket.Severity"
                         class="form-control"
                         asp-items="Html.GetEnumSelectList<TicketSeverity>()">
                     @*<option>Select Severity</option>*@
                 </select>
-                <span asp-validation-for="Severity" class="text-danger"></span>
+                <span asp-validation-for="@Model.ticket.Severity" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DateCreated" class="control-label"></label>
-                <input asp-for="DateCreated" class="form-control" />
-                <span asp-validation-for="DateCreated" class="text-danger"></span>
+                <label asp-for="@Model.ticket.DateCreated" class="control-label"></label>
+                <input asp-for="@Model.ticket.DateCreated" class="form-control" />
+                <span asp-validation-for="@Model.ticket.DateCreated" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Developer" class="control-label"></label>
-                <input asp-for="Developer" class="form-control" />
-                <span asp-validation-for="Developer" class="text-danger"></span>
+                <label asp-for="@Model.ticket.DeveloperId" class="control-label"></label>
+                <select asp-for="@Model.ticket.DeveloperId" class="form-control" asp-items="@Model.Developers"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

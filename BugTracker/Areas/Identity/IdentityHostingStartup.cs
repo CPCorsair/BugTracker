@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using BugTracker.Areas.Identity.Data;
 using BugTracker.Authorization;
 using BugTracker.Data;
@@ -34,6 +35,10 @@ namespace BugTracker.Areas.Identity
                 });
 
                 services.AddScoped<IAuthorizationHandler, ProjectCreatorIsOwnerAuthorizationHandler>();
+                services.AddScoped<ClaimsPrincipal>();
+                //is added as singleton b/c EF core isn't used and all info needed is in the Context parameter of the HandleRequirementAsync method
+                services.AddSingleton<IAuthorizationHandler, ProjectManagerAuthorizationHandler>();
+                services.AddSingleton<IAuthorizationHandler, ProjectDeveloperAuthorizationHandler>();
             });
         }
     }

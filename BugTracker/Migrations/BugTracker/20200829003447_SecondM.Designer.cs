@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BugTracker.Migrations.BugTracker
 {
     [DbContext(typeof(BugTrackerContext))]
-    [Migration("20200730213021_PriorityAndSeverity")]
-    partial class PriorityAndSeverity
+    [Migration("20200829003447_SecondM")]
+    partial class SecondM
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,6 +32,9 @@ namespace BugTracker.Migrations.BugTracker
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -55,7 +58,7 @@ namespace BugTracker.Migrations.BugTracker
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Developer")
+                    b.Property<string>("DeveloperId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Priority")
@@ -67,7 +70,10 @@ namespace BugTracker.Migrations.BugTracker
                     b.Property<int>("Severity")
                         .HasColumnType("int");
 
-                    b.Property<string>("Submitter")
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubmitterId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")

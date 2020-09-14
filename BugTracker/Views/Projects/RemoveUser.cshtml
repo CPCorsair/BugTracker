@@ -1,0 +1,9 @@
+﻿@model BugTracker.ViewModels.ProjectsRemoveUserVM
+
+<h3>Remove User for @Model.ProjectTitle</h3>
+<div asp-validation-summary="All"></div>
+<form asp-controller="Projects" asp-action="RemoveUser">
+    <input asp-for="ProjectId" type="hidden" />
+    <select asp-for="UserId" asp-items="Model.CurrentUsers"></select>
+    <input type="submit" value="Remove User" />
+</form>

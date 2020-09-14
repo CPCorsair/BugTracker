@@ -11,15 +11,20 @@ namespace BugTracker.Models
     public class Ticket
     {
         public int Id { get; set; }
+        [Display(Name ="Project")]
         public int ProjectId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Submitter { get; set; }
-        [Display(Name ="Date Created")]
+        [Display(Name ="Submitter")]
+        public string SubmitterId { get; set; }
+        [Display(Name ="Created")]
+        [DataType(DataType.Date)]
         public DateTime DateCreated { get; set; }
-        public string Developer { get; set; }
+        [Display(Name ="Developer")]
+        public string DeveloperId { get; set; }
         public TicketPriority Priority { get; set; }
         public TicketSeverity Severity { get; set; }
+        public TicketStatus Status { get; set; }
     
     }
 
@@ -37,5 +42,11 @@ namespace BugTracker.Models
         Minor,
         Major,
         Critical
+    }
+
+    public enum TicketStatus
+    {
+        Ongoing,
+        Resolved
     }
 }

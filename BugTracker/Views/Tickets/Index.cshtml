@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<BugTracker.Models.Ticket>
+@using Microsoft.AspNetCore.Identity
+@using BugTracker.Areas.Identity.Data 
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Index";
@@ -26,66 +29,83 @@
 <!-- /.content-header -->
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Create New Ticket</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Submitter)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Priority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Severity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateCreated)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Developer)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Submitter)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Priority)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Severity)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateCreated)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Developer)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tickets</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.Title)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Description)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Status)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Priority)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Severity)</th>
+                                    <th>@Html.DisplayNameFor(model => model.DateCreated)</th>
+                                    <th>@Html.DisplayNameFor(model => model.DeveloperId)</th>
+                                    <th>@Html.DisplayNameFor(model => model.SubmitterId)</th>
+                                    <th></th>@*Empty col header here so that there will be gray table row border*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                <tr>
+                                    <td>
+                                        @*Can just do item.Title, but m => item.Title will format html properly*@
+                                        @Html.DisplayFor(m => item.Title)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(m => item.Description)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(m => item.Status)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(m => item.Priority)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(m => item.Severity)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(m => item.DateCreated)
+                                    </td>
+                                    <td>
+                                        @(new String (await userManager.GetEmailAsync(await userManager.FindByIdAsync(item.DeveloperId))))
+                                    </td>
+                                    <td>
+                                        
+                                        @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(item.SubmitterId))))
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+            
+        </div>
+        <!-- /.row -->
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->

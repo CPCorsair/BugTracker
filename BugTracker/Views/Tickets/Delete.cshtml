@@ -1,4 +1,7 @@
 ﻿@model BugTracker.Models.Ticket
+@using Microsoft.AspNetCore.Identity
+@using BugTracker.Areas.Identity.Data
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Delete";
@@ -25,10 +28,10 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Submitter)
+            @Html.DisplayNameFor(model => model.SubmitterId)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Submitter)
+            @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.SubmitterId))))
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Priority)
@@ -49,13 +52,13 @@
             @Html.DisplayFor(model => model.DateCreated)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Developer)
+            @Html.DisplayNameFor(model => model.DeveloperId)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Developer)
+            @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.DeveloperId))))
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |

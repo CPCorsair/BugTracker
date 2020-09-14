@@ -1,0 +1,9 @@
+﻿@model BugTracker.ViewModels.ProjectsAddUserVM
+
+<h3>Add User for "@Model.ProjectTitle" Project</h3>
+<div asp-validation-summary="All"></div>
+<form asp-controller="Projects" asp-action="AddUser">
+    <input asp-for="ProjectId" type="hidden" />
+    <select asp-for="UserId" asp-items="Model.Users"></select>
+    <input type="submit" value="Add User" />
+</form>

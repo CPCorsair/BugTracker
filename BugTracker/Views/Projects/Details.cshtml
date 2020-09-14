@@ -1,4 +1,8 @@
-﻿@model BugTracker.Models.Project
+﻿@model BugTracker.ViewModels.ProjectsDetailsVM
+@using Microsoft.AspNetCore.Identity
+@using  BugTracker.Areas.Identity.Data
+@inject UserManager<ApplicationUser> userManager
+
 
 @{
     ViewData["Title"] = "Details";
@@ -9,67 +13,131 @@
 
 <div>
     <h4>Project</h4>
+    <div asp-validation-summary="All"></div>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Project.Title)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Project.Title)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Project.Description)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Project.Description)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateCreated)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Project.DateCreated)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateCreated)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Project.DateCreated)
         </dd>
     </dl>
+
+    <a asp-action="Edit" asp-route-id="@Model.Project.Id">Edit Project Details</a>
 </div>
-<table class="table">
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Submitter</th>
-        <th>Priority</th>
-        <th>Severity</th>
-        <th>Date Created</th>
-        <th>Developer</th>
-    </tr>
-    @foreach (var item in Model.Tickets)
-    {
-<tr>
-    <td>
-        @*Can just do item.Title, but m => item.Title will format html properly*@
-        @Html.DisplayFor(m => item.Title)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.Description)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.Submitter)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.Priority)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.Severity)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.DateCreated)
-    </td>
-    <td>
-        @Html.DisplayFor(m => item.Developer)
-    </td>
-</tr>
-    }
-</table>
+
+
+
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Project Tickets</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Created</th>
+                                    <th>Developer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Project.Tickets)
+                                {
+                                    <tr>
+                                        <td>
+                                            @*Can just do item.Title, but m => item.Title will format html properly*@
+                                            @Html.DisplayFor(m => item.Title)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(m => item.Status)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(m => item.Severity)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(m => item.DateCreated)
+                                        </td>
+                                        <td style="white-space: normal; word-wrap: break-word;min-width: 160px;max-width: 160px;">
+                                            @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(item.DeveloperId))))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+            <!-- /.col Second Column Below -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Assigned Users</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>User Email</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in Model.UsersWithClaim)
+                                {
+                                    <tr>
+                                        <td>
+                                            @u.Email
+                                        </td>
+                                        <td>
+                                            @(string.Join(", ", await userManager.GetRolesAsync(u)))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+       
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+ 
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="AddUser" asp-route-id="@Model.Project.Id">Add User</a> |
+    <a asp-action="RemoveUser" asp-route-id="@Model.Project.Id">Remove A User</a> |
     <a asp-action="Index">Back to List</a>
 </div>

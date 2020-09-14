@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace BugTracker.ViewModels
 {
-    public class UserManagementDeleteRoleViewModel
+    public class ProjectsRemoveUserVM
     {
+        public int ProjectId { get; set; }
+        public string ProjectTitle { get; set; }
         public string UserId { get; set; }
-        public string OldRole { get; set; }
-        public SelectList CurrentRoles { get; set; }
-        public string Email { get; set; }
+        public SelectList CurrentUsers { get; set; }
     }
 }

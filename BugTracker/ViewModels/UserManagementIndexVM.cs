@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BugTracker.ViewModels
 {
-    public class UserManagementIndexViewModel
+    public class UserManagementIndexVM
     {
         public List<ApplicationUser> Users { get; set; }
     }

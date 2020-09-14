@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace BugTracker.ViewModels
 {
-    public class UserManagementAddRoleViewModel
+    public class UserManagementAddRoleVM
     {
         public string UserId { get; set; }
         public string NewRole { get; set; }
