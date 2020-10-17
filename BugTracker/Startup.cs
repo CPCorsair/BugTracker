@@ -12,6 +12,8 @@ using BugTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using BugTracker.Configuration;
 using Microsoft.AspNetCore.Identity;
+using BugTracker.Areas.Identity.Data;
+using BugTracker.Models;
 
 namespace BugTracker
 {
@@ -35,7 +37,7 @@ namespace BugTracker
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<ApplicationUser> userManager)
         {
             if (env.IsDevelopment())
             {
@@ -56,6 +58,10 @@ namespace BugTracker
             app.UseAuthentication();
             app.UseAuthorization();
 
+
+         
+           
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -68,10 +74,15 @@ namespace BugTracker
             IServiceScopeFactory scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
 
             IServiceScope scope = scopeFactory.CreateScope();
-            RoleManager<IdentityRole> roleManager = 
-                scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            RoleManager<IdentityRole> roleManager =
+               scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            new UserRoleSeed(roleManager).Seed();
+
+            new IdentityDataInitializer(userManager, roleManager).Seed();
+
+           // SampleData.Initialize(app.ApplicationServices);
+
+
         }
             
     }

@@ -13,50 +13,74 @@
 <div>
     <h4>Ticket</h4>
     <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.SubmitterId)
-        </dt>
-        <dd class="col-sm-10">
-            @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.SubmitterId)))) 
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Priority)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Priority)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Severity)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Severity)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DateCreated)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DateCreated)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DeveloperId)
-        </dt>
-        <dd class="col-sm-10">
-            @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.DeveloperId))))
-        </dd>
-    </dl>
+</div>
+
+<div class="card-body">
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+            <div class="row">
+                <div class="col-12 col-sm-4">
+                    <div class="info-box bg-light">
+                        <div class="info-box-content">
+                            <span class="info-box-text text-center text-muted"> @Html.DisplayNameFor(model => model.Title)</span>
+                            <span class="info-box-number text-center text-muted mb-0">@Html.DisplayFor(model => model.Title)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="info-box bg-light">
+                        <div class="info-box-content">
+                            <span class="info-box-text text-center text-muted"> @Html.DisplayNameFor(model => model.Description)</span>
+                            <span class="info-box-number text-center text-muted mb-0"> @Html.DisplayFor(model => model.Description)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="info-box bg-light">
+                        <div class="info-box-content">
+                            <span class="info-box-text text-center text-muted">@Html.DisplayNameFor(model => model.DateCreated)</span>
+                            <span class="info-box-number text-center text-muted mb-0">@Html.DisplayFor(model => model.DateCreated)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-sm-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">@Html.DisplayNameFor(model => model.SubmitterId)</span>
+                    <span class="info-box-number text-center text-muted mb-0"> @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.SubmitterId)))) </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">@Html.DisplayNameFor(model => model.DeveloperId)</span>
+                    <span class="info-box-number text-center text-muted mb-0"> @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(Model.DeveloperId))))</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">@Html.DisplayNameFor(model => model.Priority)</span>
+                    <span class="info-box-number text-center text-muted mb-0">@Html.DisplayFor(model => model.Priority)</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">@Html.DisplayNameFor(model => model.Severity)</span>
+                    <span class="info-box-number text-center text-muted mb-0">@Html.DisplayFor(model => model.Severity)</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |

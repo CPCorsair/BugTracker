@@ -22,7 +22,7 @@ namespace BugTracker.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "Projects");
         }
 
         [AllowAnonymous]

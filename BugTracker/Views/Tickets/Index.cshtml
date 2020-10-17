@@ -8,7 +8,6 @@
     Layout = "~/Views/Shared/_AdminLte.cshtml";
 }
 
-@*<h1>Tickets</h1>*@
 
 <!-- Content Header (Page header) -->
 <div class="content-header">
@@ -19,12 +18,24 @@
         </div><!-- /.col -->
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active">Starter Page</li>
+                <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+                <li class="breadcrumb-item active">Tickets Page</li>
             </ol>
         </div><!-- /.col -->
     </div><!-- /.row -->
     @*</div><!-- /.container-fluid -->*@
+    <!-- SEARCH FORM -->
+    <form class="form-inline" asp-controller="Tickets" asp-action="Index">
+        <div class="input-group input-group-sm">
+            <input class="form-control form-control-navbar" type="search" name="SearchString" placeholder="Search" aria-label="Search">
+            <div class="input-group-append">
+                <button class="btn btn-navbar" type="submit" value="Filter">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+        </div>
+    </form>
 </div>
 <!-- /.content-header -->
 
@@ -88,8 +99,8 @@
                                         @(new String(await userManager.GetEmailAsync(await userManager.FindByIdAsync(item.SubmitterId))))
                                     </td>
                                     <td>
-                                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> <br />
+                                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> <br />
                                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                                     </td>
                                 </tr>

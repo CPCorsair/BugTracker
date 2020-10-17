@@ -17,5 +17,6 @@ namespace BugTracker.Data
 
         public DbSet<Project> Projects { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
+        public object Ticket { get; internal set; }
     }
 }

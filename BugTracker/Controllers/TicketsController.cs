@@ -30,9 +30,16 @@ namespace BugTracker.Controllers
         }
 
         // GET: Tickets
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.Tickets.ToListAsync());
+            var tickets = from t in _context.Tickets
+                           select t;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                tickets = tickets.Where(s => s.Title.Contains(searchString));
+            }
+            return View(await tickets.ToListAsync());
         }
 
         // GET: Tickets/Details/5

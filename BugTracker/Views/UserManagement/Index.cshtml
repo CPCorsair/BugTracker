@@ -1,25 +1,67 @@
-﻿@using Microsoft.AspNetCore.Identity; 
-@using BugTracker.Areas.Identity.Data; 
+﻿@using Microsoft.AspNetCore.Identity;
+@using BugTracker.Areas.Identity.Data;
 @model BugTracker.ViewModels.UserManagementIndexVM
-@inject UserManager<ApplicationUser> userManager 
+@inject UserManager<ApplicationUser> userManager
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    @*<div class="container-fluid">*@
+    <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Manage User Roles</h1>
+        </div><!-- /.col -->
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">User Roles Page</li>
+            </ol>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+    @*</div><!-- /.container-fluid -->*@
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tickets</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Roles</th>
+                                    <th>Options</th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.Users)
+                                {
+                                    <tr>
+                                        <td>@user.Email</td>
+                                        <td>@(string.Join(", ", await userManager.GetRolesAsync(user)))</td>
+                                        <td><a asp-controller="UserManagement" asp-action="AddRole" asp-route-id="@user.Id">Add Role</a> |
+                                        <a asp-controller="UserManagement" asp-action="DeleteRole" asp-route-id="@user.Id">Delete Role</a></td>
+                                       
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.Users)
-            {
-                <tr>
-                    <td>@user.Email</td>
-                    <td>@(string.Join(", ", await userManager.GetRolesAsync(user)))</td>
-                    <td><a asp-controller="UserManagement" asp-action="AddRole" asp-route-id="@user.Id">Add Role</a></td>
-                    <td><a asp-controller="UserManagement" asp-action="DeleteRole" asp-route-id="@user.Id">Delete Role</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
+
+        </div>
+        <!-- /.row -->
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
